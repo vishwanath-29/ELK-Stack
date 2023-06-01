@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack_monitoring_enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    restart: always
+    ports:
+      - 9200:9200
+      - 9300:9300
+    expose:
+      - 9200
+      - 9300
+  
+  logstash:
+    container_name: logstash
+    image: docker.elastic.co/logstash/logstash:8.8.0
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf 
+      - ./logstash.conf:/usr/share/logstash/config/logstash.conf
+    ports:
+      - 9600:9600
+    depends_on:
+      - elasticsearch
+    expose:
+      - 9600
+      - 5044
+    restart: always
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    ports:
+      - 5601:5601
+    expose:
+      - 5601
+    depends_on:
+      - elasticsearch
+    restart: always
+
+  filebeat:
+    container_name: filebeat
+    image: docker.elastic.co/beats/filebeat:8.8.0
+    volumes: 
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./model.log:/usr/share/filebeat/test.log
+    depends_on:
+      - logstash
+    restart: always
