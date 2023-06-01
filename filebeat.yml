@@ -1,0 +1,7 @@
+filebeat.inputs:
+- type: log
+  paths:
+    - /usr/share/filebeat/test.log
+output.logstash:
+  enabled: true
+  hosts: ["logstash:5044"]
