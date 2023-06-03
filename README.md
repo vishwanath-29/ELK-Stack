@@ -1,63 +1,38 @@
 
-# IoT Crop Yield Preiction
+# ELK Stack
 
-A full fledged IoT based application to monitor vitals of plants and predict the overall yield of the crop. It uses a linear regression based model to predict the yield based of various factors such as soil moisture,temperature etc.
-The application has three parts to it, they are
-- Sensor End
-- Prediction model
-- Full Stack application to integrate all
+ELK Stack is one of the well known and popular framework used for many realtime use cases such as logging, log analysis and its visualization as well. It is an set of open source tools that work together to give the real time data analysis. 
+It consists of three major components
+- **E**lasticsearch
+- **L**ogstash
+- **K**ibana
+Logstash collects data from various sources, processes it,transforms it, processes it and send it to elasticsearch. Elasticsearch saves data in a document format and then kibana is used for visualization. This repo mainly focuses on bringing all together in a single component. Generally we are required to install them separately and do a lot of tasks, this reduces the hassle. Generally beats are used to stream data to logstash.Filebeat is also included in the compose as it is there to verify if everything is working.
 
-To emulate the hardware, there is a python script to randomly generate the values and send it to cloud. Instead of which we can use real sensors and computing device to process the same. The Prediction model uses a linear regression based model to predict the yield. For the final application, python based Django was used. It integrates everything into a single application, it is responsible for fetching data from cloud, processing it with the model and showing the result in a web page. 
-For bringing everything together various services of Azure was used 
-- Azure IoT Hub
-- Azure Database
-- Azure Stream
-The IoT device sends data to IoT Hub, the stream fetches the data from there and posts it in a common database hosted to which the Djano application can communicates with and do all the post processing
-## Tech Stack
 
-**Client:**  HTML,CSS,Tailwind CSS,Javascript
 
-**Server:** Python, Django
+## Deployment
 
-**Cloud:** Azure - IoT Hub, Stream Analytics, Azure SQL Database
-
-## Run Locally
-
-Before doing these, you need to configure IoT Stream and IoT Hub. The stream must take data from IoT Hub and saves it in the database. Azure Relational Database is required for the same\
-Clone the project
+To deploy this ELK stack, you require docker. The below provides a way to install docker in an apt package manager method, do check the official documentation of docker to install in your respective machines as well.
 
 ```bash
-  git clone https://github.com/vishwanath-29/Iot_Crop_yield_Prediction.git
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
-
-Go to the directory
-
+For changing the configurations of logstash,filebeat you can use the files provided as they are mounted to the container, changes made in the files will be reflected in the container, just make sure to down the compose and up it again after making changes.\
+To run the ELK stack just run the following command 
 ```bash
-  cd Iot_Crop_yield_Prediction
+docker-compose up
 ```
-
-Install dependencies and necessary files
-
+Wait for few mins, it will pull the 8.8.0 image version and build the stack, after sometime you can verify by going to localhost:5061 to see kibana UI\
+To verify if everything is working fine, run the logging_script
 ```bash
-  pip install -r requirements.txt
+python logging_script.py
 ```
-
-For the IoT End, the following command will start the script and send data to the Azure IoT Hub, do note that you require IoT Hub credentials set for sending the data 
-```bash
-  cd IoT_Wheat_Yield_Prediction/IoT_End
-  python azure_iot_emulate.py
-```
-
-For starting the Django Applcation
-```bash
-  python manage.py runserver
-```
-
-
-
-## Authors
-
-- [@Vishwanath N](https://www.github.com/vishwanath-29)
-- [@Vishal GK](https://www.github.com/gkvishal7)
-- [@Varun ](https://www.github.com/varunbalaji1303)
-
+This will write logs to local filesystem, filebeat will write it to logstash which will forward the same to elasticsearch. You can check official documentation of elasticsearch to query the data either through Kibana dev tools or through CLI
