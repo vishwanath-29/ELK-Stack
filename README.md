@@ -5,7 +5,8 @@ ELK Stack is one of the well known and popular framework used for many realtime 
 It consists of three major components
 - **E**lasticsearch
 - **L**ogstash
-- **K**ibana
+- **K**ibana\
+
 Logstash collects data from various sources, processes it,transforms it, processes it and send it to elasticsearch. Elasticsearch saves data in a document format and then kibana is used for visualization. This repo mainly focuses on bringing all together in a single component. Generally we are required to install them separately and do a lot of tasks, this reduces the hassle. Generally beats are used to stream data to logstash.Filebeat is also included in the compose as it is there to verify if everything is working.
 
 
